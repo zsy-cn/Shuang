@@ -1,4 +1,4 @@
-/** last changed: 2018.11.15 */
+/** last changed: 2019.3.10 */
 
 Shuang.app.action = {
   init() {
@@ -17,7 +17,8 @@ Shuang.app.action = {
     function renderSelect(target, options, callback) {
       options.forEach(option => {
         const opt = document.createElement('option')
-        opt.innerText = option
+        if (option.disabled) opt.setAttribute('disabled', 'disabled')
+        opt.innerText = option.text || option
         target.appendChild(opt)
       })
       target.onchange = e => {
@@ -25,7 +26,27 @@ Shuang.app.action = {
       }
     }
     
-    renderSelect($('#scheme-select'), Object.values(Shuang.resource.schemeList), value => {
+    const schemeList = Object.values(Shuang.resource.schemeList)
+    const schemes = {
+      common: schemeList.filter(scheme => !scheme.endsWith('*')),
+      uncommon: schemeList
+          .filter(scheme => scheme.endsWith('*') && !scheme.endsWith('**'))
+          .map(scheme => scheme.slice(0, -1))
+      ,
+      rare: schemeList
+          .filter(scheme => scheme.endsWith('**'))
+          .map(scheme => scheme.slice(0, -2))
+    }
+    const schemeOptions = [
+        {disabled: true, text: '常见'},
+        ...schemes.common,
+        {disabled: true, text: '小众'},
+        ...schemes.uncommon,
+        {disabled: true, text: '爱好者'},
+        ...schemes.rare,
+    ]
+    
+    renderSelect($('#scheme-select'), schemeOptions, value => {
       Shuang.app.setting.setScheme(value)
     })
     renderSelect($('#mode-select'), Object.values(Shuang.app.modeList).map(mode => mode.name), value => {
@@ -53,6 +74,12 @@ Shuang.app.action = {
     })
     $('#dark-mode-switcher').addEventListener('change', e => {
       Shuang.app.setting.setDarkMode(e.target.checked)
+    })
+    $('#auto-next-switcher').addEventListener('change', e => {
+      Shuang.app.setting.setAutoNext(e.target.checked)
+    })
+    $('#auto-clear-switcher').addEventListener('change', e => {
+      Shuang.app.setting.setAutoClear(e.target.checked)
     })
     $('.pay-name#alipay').addEventListener('mouseover', () => {
       Shuang.app.action.qrShow('alipay-qr')
@@ -111,14 +138,22 @@ Shuang.app.action = {
         break
       default:
         a.value = a.value.slice(0, 2).replace(/[^a-zA-Z;]/g, '')
-        this.judge()
+        const canAuto = a.value.length === 2
+        const isRight = this.judge()
+        if (canAuto) {
+          if (isRight && Shuang.app.setting.config.autoNext === 'true') {
+            this.next()
+          } else if (!isRight && Shuang.app.setting.config.autoClear === 'true') {
+            this.redo()
+          }
+        }
     }
   },
   judge() {
     const input = $('#a')
+    const btn = $('#btn')
     const _sheng = input.value[0]
     const _yun = input.value[1]
-    const btn = $('#btn')
     if (_yun) {
       if (Shuang.core.current.judge(_sheng, _yun)) {
         btn.onclick = () => {

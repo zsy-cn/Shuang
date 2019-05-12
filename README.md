@@ -1,11 +1,13 @@
 Shuang | 双拼练习
 ----
 
-v5.3 2018.12.7 更新
+v5.5 2019.3.10 更新
 
 ### 开始使用
 
 [https://api.ihint.me/shuang](https://api.ihint.me/shuang)
+
+字帖：[https://api.ihint.me/zi](https://api.ihint.me/zi)
 
 ### 功能介绍
 
@@ -60,3 +62,13 @@ v5.3 2018.12.7 更新
 ### 许可
 
 该工具仅供学习研究使用，不允许用于商业目的
+
+### 特别提示
+
+使用 macOS 的用户可以通过在终端中运行
+
+`defaults write com.apple.inputmethod.CoreChineseEngineFramework shuangpinLayout 5`
+
+将原生双拼输入法设置成 **自然码方案**
+
+![图示](https://i.loli.net/2018/12/19/5c1a3ea5e809b.png)

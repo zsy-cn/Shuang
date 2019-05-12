@@ -1,28 +1,42 @@
-/** last changed: 2018.11.15 */
+/** last changed: 2019.3.10 */
 
 Shuang.app.setting = {
   config: {
     scheme: 'guobiao',
     mode: 'all-random',
     showPic: 'true',
-    darkMode: 'false'
+    darkMode: 'false',
+    autoNext: 'false',
+    autoClear: 'false'
   },
   reload() {
     if (localStorage.getItem('scheme')) this.config.scheme = localStorage.getItem('scheme')
     if (localStorage.getItem('mode')) this.config.mode = localStorage.getItem('mode')
     if (localStorage.getItem('showPic')) this.config.showPic = localStorage.getItem('showPic')
     if (localStorage.getItem('darkMode')) this.config.darkMode = localStorage.getItem('darkMode')
-    $('#scheme-select')[Object.keys(Shuang.resource.schemeList).indexOf(this.config.scheme)].selected = true
+    if (localStorage.getItem('autoNext')) this.config.autoNext = localStorage.getItem('autoNext')
+    if (localStorage.getItem('autoClear')) this.config.autoClear = localStorage.getItem('autoClear')
+    ;[].find.call(
+        $('#scheme-select').children,
+            schemeOption => Shuang.resource.schemeList[Shuang.app.setting.config.scheme].startsWith(schemeOption.innerText)
+    ).selected = true
     $('#mode-select')[Object.keys(Shuang.app.modeList).indexOf(this.config.mode)].selected = true
     $('#pic-switcher').checked = this.config.showPic === 'true'
     $('#dark-mode-switcher').checked = this.config.darkMode === 'true'
+    $('#auto-next-switcher').checked = this.config.autoNext === 'true'
+    $('#auto-clear-switcher').checked = this.config.autoClear === 'true'
     this.setScheme(Shuang.resource.schemeList[this.config.scheme], false)
     this.setMode(Shuang.app.modeList[this.config.mode].name)
     this.setPicVisible(this.config.showPic)
     this.setDarkMode(this.config.darkMode)
+    this.setAutoNext(this.config.autoNext)
+    this.setAutoClear(this.config.autoClear)
   },
   setScheme(schemeName, next = true) {
-    this.config.scheme = Object.keys(Shuang.resource.schemeList)[Object.values(Shuang.resource.schemeList).indexOf(schemeName)]
+    this.config.scheme = Object.keys(Shuang.resource.schemeList)[
+        Object.values(Shuang.resource.schemeList)
+            .findIndex(scheme => scheme.startsWith(schemeName))
+        ]
     localStorage.setItem('scheme', this.config.scheme)
     const callback = () => {
       if (next) Shuang.app.action.next()
@@ -63,6 +77,14 @@ Shuang.app.setting = {
     } else if (this.config.darkMode === 'false') {
       $('body').setAttribute('class', '')
     }
+  },
+  setAutoNext(bool) {
+    this.config.autoNext = bool.toString()
+    localStorage.setItem('autoNext', this.config.autoNext)
+  },
+  setAutoClear(bool) {
+    this.config.autoClear = bool.toString()
+    localStorage.setItem('autoClear', this.config.autoClear)
   },
   updateTips() {
     const tips = $('#tips')
